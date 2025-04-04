@@ -1,4 +1,4 @@
-# Shopping Trends - ETL Pipeline + REST API + Dashboard de Análisis
+# Shopping Trends - ETL, API REST y Dashboard de Análisis
 
 ## 📌 Descripción general
 
@@ -14,14 +14,14 @@ Solución end-to-end para el análisis de tendencias de compra. El sistema extra
 
 ## 🚀 Funcionalidades Clave
 
-### ETL Pipeline
+### ETL
 - Ingesta de datos simulando una carga desde S3 (archivo CSV local).
 - Limpieza y transformación de datos con Pandas.
 - Normalización del dataset en un modelo relacional (clientes, productos, transacciones).
 - Carga optimizada a PostgreSQL utilizando inserciones masivas (`bulk_create`).
 - Estructura preparada para ejecución periódica con Celery (actualizaciones automáticas).
 
-### API RESTful
+### API REST
 - Endpoints organizados por recurso: clientes, productos, ventas.
 - Soporte para filtros y búsquedas por parámetros clave.
 - Documentación generada automáticamente con Swagger / OpenAPI.
@@ -44,9 +44,7 @@ Solución end-to-end para el análisis de tendencias de compra. El sistema extra
 
 ### **Setup Inicial**
 - [X] Estructura de proyecto (backend/frontend/data)
-- [ ] Setup de Django y DRF
-  - [ ] Conexión a PostgreSQL
-  - [ ] Crear modelos base
+- [X] Setup de Django y DRF
 - [ ] Configurar Docker-compose
 
 ### **ETL**

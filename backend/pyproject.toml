@@ -1,0 +1,13 @@
+[tool.black]
+target_version = ['py311']
+line-length = 88
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  | locale
+  | media
+  | migrations
+  | static
+  | templates
+)/
+'''

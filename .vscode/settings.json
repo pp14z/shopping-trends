@@ -12,9 +12,12 @@
     "editor.defaultFormatter": "ms-python.black-formatter",
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-      "source.organizeImports": true
+      "source.organizeImports": "explicit"
     }
   },
+  "black-formatter.args": ["--config=${workspaceFolder}/backend/pyproject.toml"],
+  "flake8.args": ["--config=${workspaceFolder}/backend/setup.cfg"],
+  "isort.args": ["--settings-path=${workspaceFolder}/backend/setup.cfg"],
 
   // TypeScript/Next.js settings
   "typescript.tsdk": "frontend/node_modules/typescript/lib",
