@@ -1,0 +1,20 @@
+{
+    "recommendations": [
+        // Python/Django
+        "ms-python.python",
+        "ms-python.black-formatter",
+        "ms-python.flake8",
+        "ms-python.isort",
+        
+        // TypeScript/Next.js
+        "dbaeumer.vscode-eslint",
+        "mikestead.dotenv",
+        "csstools.postcss",
+        "bradlc.vscode-tailwindcss",
+        "vitest.explorer",
+        "yoavbls.pretty-ts-errors",
+
+        // CI
+        "github.vscode-github-actions"
+    ]
+}
