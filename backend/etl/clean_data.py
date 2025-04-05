@@ -1,7 +1,6 @@
 import pandas as pd
 
 from core.models.choices import (
-    AgeGroup,
     Category,
     Gender,
     PaymentMethod,
@@ -10,6 +9,7 @@ from core.models.choices import (
     ShippingType,
     Size,
 )
+from core.utils import get_age_group
 
 EXPECTED_COLUMNS = {
     "customer id",
@@ -40,19 +40,6 @@ REQUIRED_FIELDS = [
 ]
 
 
-def get_age_group(age):
-    if age < 18:
-        return AgeGroup.UNDER_18
-    elif 18 <= age <= 25:
-        return AgeGroup.B18_25
-    elif 26 <= age <= 35:
-        return AgeGroup.B26_35
-    elif 36 <= age <= 50:
-        return AgeGroup.B36_50
-    else:
-        return AgeGroup.OVER_51
-
-
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     # Eliminar columnas no esperadas
     df.columns = [col.strip().lower() for col in df.columns]
@@ -63,11 +50,22 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     if missing_required:
         raise ValueError(f"Faltan columnas requeridas: {missing_required}")
 
+    # Asegurar que customer id sea numérico
+    df["customer id"] = pd.to_numeric(df["customer id"], errors="coerce").astype(
+        "Int64"
+    )
+
+    # Convertir purchase amount a numérico
+    df["purchase amount (usd)"] = pd.to_numeric(
+        df["purchase amount (usd)"], errors="coerce"
+    )
+
     # Eliminar las filas que no tienen todos los campos requeridos.
     df.dropna(subset=REQUIRED_FIELDS, inplace=True)
 
     # Eliminar registros duplicados por customer ID
     df.drop_duplicates(subset="customer id", keep="first", inplace=True)
+    df["customer id"] = df["customer id"].astype(int)
 
     # Normalización de texto
     text_columns = [
@@ -95,15 +93,16 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     # Conversión de edad
     df["age"] = pd.to_numeric(df.get("age"), errors="coerce")
     median_age = df["age"].median()
-    df["age"] = df["age"].fillna(median_age)
+    df["age"] = df["age"].fillna(median_age).astype(int)
 
     # Calcular grupo etario
     df["age group"] = df["age"].apply(get_age_group)
 
     # Asignar defaults
     df["gender"] = df["gender"].fillna(Gender.UNKNOWN)
-    df["subscription status"] = df["subscription status"].fillna(False)
-    df["previous purchases"] = df["previous purchases"].fillna(0)
+    df["previous purchases"] = (
+        pd.to_numeric(df["previous purchases"], errors="coerce").fillna(0).astype(int)
+    )
     df["frequency of purchases"] = df["frequency of purchases"].fillna(
         PurchaseFrequency.UNKNOWN
     )
@@ -115,8 +114,12 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     df["size"] = df["size"].fillna(Size.OTHER)
     df["color"] = df["color"].fillna("unknown")
     df["payment method"] = df["payment method"].fillna(PaymentMethod.UNKNOWN)
-    df["discount applied"] = df["discount applied"].fillna(False)
-    df["promo code used"] = df["promo code used"].fillna(False)
+
+    # Conversión de booleanos desde "yes"/"no"
+    bool_map = {"yes": True, "no": False}
+    df["subscription status"] = df["subscription status"].map(bool_map).fillna(False)
+    df["discount applied"] = df["discount applied"].map(bool_map).fillna(False)
+    df["promo code used"] = df["promo code used"].map(bool_map).fillna(False)
 
     # Rellenar 'review rating' con la mediana
     df["review rating"] = pd.to_numeric(df["review rating"], errors="coerce")
@@ -128,6 +131,7 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
         df["location"] = df["location"].fillna(
             location_mode[0] if not location_mode.empty else "unknown"
         )
+        df["location"] = df["location"].str.title()
 
     # Rellenar 'shipping type' con la moda o 'standard'
     if "shipping type" in df.columns:

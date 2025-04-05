@@ -50,9 +50,10 @@ Solución end-to-end para el análisis de tendencias de compra. El sistema extra
 
 ### **ETL**
 - [X] Crear script para limpiar y validar data
-- [ ] Crear script para cargar data
-- [ ] Optimizar carga con `bulk_create`
-- [ ] Limpiar datos (nulos, formatos)
+- [X] Crear script para cargar data
+- [X] Optimizar carga con `bulk_create`
+- [X] Crear task para ejecutar el proceso ETL de forma programada
+- [ ] Añadir management command para correr ETL manualmente
 - [ ] Simular actualizaciones periódicas con Celery
 
 ### **API**
@@ -78,25 +79,17 @@ Se diseñó una función de limpieza (`clean_data`) que valida la estructura del
 
 Se definieron valores por defecto basados en los modelos (`choices`) para los campos faltantes, como `"unknown"` para valores categóricos, `False` para booleanos, y mediana o moda para datos numéricos. Además, se estandarizó todo el texto a minúsculas y sin espacios extra, y se garantizó que cada producto tuviera una única categoría consistente, basada en la moda por nombre de producto.
 
+### 📥 Carga de Datos en Base de Datos
+
+Se implementó la función `load_data` para poblar las tablas del sistema utilizando el ORM de Django de forma eficiente y segura. Se empleó `bulk_create` para minimizar la cantidad de queries al insertar nuevos registros de clientes, productos, variantes y órdenes.
+
+Para evitar errores por duplicados en clientes, se consultaron previamente los `customer_id` existentes en la base de datos y se excluyeron del conjunto a insertar. En lugar de utilizar `get_or_create` dentro de bucles —lo cual implicaría una gran cantidad de queries—, se construyeron diccionarios de búsqueda (`product_lookup`, `variant_lookup`, etc.) que mapean combinaciones clave como `(name, category, season)` para productos y `(product, size, color)` para variantes, permitiendo resolver referencias sin acceso repetido a la base de datos.
+
+Una vez resueltas todas las relaciones con `Customer` y `ProductVariant`, se procedió a insertar las órdenes también mediante `bulk_create`. Este enfoque asegura una carga de datos robusta, eficiente y libre de errores de integridad, optimizada para grandes volúmenes de información.
+
 ---
-
-¿Quieres que también prepare un bloque similar más adelante para `load_data()` una vez lo tengamos?
-
-### 🧨 Filtrado de filas inválidas
-Las filas que contienen datos faltantes en alguno de los siguientes campos críticos se descartan completamente:
-
-- `Customer ID` (identificador de cliente)
-- `Item Purchased` (producto comprado)
-- `Purchase Amount (USD)` (monto de la compra)
-
-Estas columnas son necesarias para mantener la integridad de las relaciones y para el cálculo correcto de métricas.
-
---
 
 ## Futuras mejoras
 - Agrupar colores de productos por sombras/color principal?
-- 
 
---
-
-
+---

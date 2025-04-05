@@ -336,10 +336,6 @@ class Migration(migrations.Migration):
                 fields=("product", "size", "color"), name="unique_variant"
             ),
         ),
-        migrations.AlterUniqueTogether(
-            name="productvariant",
-            unique_together={("product", "size", "color")},
-        ),
         migrations.AddIndex(
             model_name="order",
             index=models.Index(

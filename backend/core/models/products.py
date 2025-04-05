@@ -56,7 +56,6 @@ class ProductVariant(models.Model):
     class Meta:
         verbose_name = "variante de producto"
         verbose_name_plural = "variantes de producto"
-        unique_together = ("product", "size", "color")
         constraints = [
             models.UniqueConstraint(
                 fields=["product", "size", "color"], name="unique_variant"
