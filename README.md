@@ -45,7 +45,8 @@ Solución end-to-end para el análisis de tendencias de compra. El sistema extra
 ### **Setup Inicial**
 - [X] Estructura de proyecto (backend/frontend/data)
 - [X] Setup de Django y DRF
-- [ ] Configurar Docker-compose
+- [X] Configurar Docker-compose
+- [X] Crear modelos base
 
 ### **ETL**
 - [ ] Crear script de carga inicial con Pandas
@@ -63,3 +64,37 @@ Solución end-to-end para el análisis de tendencias de compra. El sistema extra
 - [ ] ...
 
 ---
+
+## Decisiones Técnicas
+
+### 🗄️ Modelado de la Base de Datos
+
+Se normalizó la información en cuatro tablas principales: Clientes, Productos, Variantes de Productos y Órdenes. Se definieron índices en los campos que se anticipan como los más utilizados para filtrar la información en el panel de control. Se establecieron valores predeterminados (`defaults`) para campos donde la ausencia de datos no afectaría significativamente el análisis estadístico. También se identificaron los campos obligatorios, cuya ausencia resultaría en la exclusión del registro para mantener la integridad de los datos esenciales.
+
+### 🔍 Validación y limpieza de datos
+
+Antes de cargar los datos en la base de datos, el archivo CSV pasa por un proceso de validación y limpieza dentro de la función `clean_data()`.
+
+- Se verifica que el archivo contenga todas las columnas requeridas.
+- Se ignoran columnas adicionales que no forman parte del esquema esperado.
+- Se valida que los tipos de datos sean consistentes con cada campo.
+- Se comprueba que valores críticos tengan valores válidos (por ejemplo: `"Yes"`/`"No"` en campos booleanos).
+
+### 🧨 Filtrado de filas inválidas
+Las filas que contienen datos faltantes en alguno de los siguientes campos críticos se descartan completamente:
+
+- `Customer ID` (identificador de cliente)
+- `Item Purchased` (producto comprado)
+- `Purchase Amount (USD)` (monto de la compra)
+
+Estas columnas son necesarias para mantener la integridad de las relaciones y para el cálculo correcto de métricas.
+
+--
+
+## Futuras mejoras
+- Agrupar colores de productos por sombras/color principal?
+- 
+
+--
+
+
