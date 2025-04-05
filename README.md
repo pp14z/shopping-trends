@@ -49,8 +49,9 @@ Solución end-to-end para el análisis de tendencias de compra. El sistema extra
 - [X] Crear modelos base
 
 ### **ETL**
-- [ ] Crear script de carga inicial con Pandas
-- [ ] Optimizar con `bulk_create`
+- [X] Crear script para limpiar y validar data
+- [ ] Crear script para cargar data
+- [ ] Optimizar carga con `bulk_create`
 - [ ] Limpiar datos (nulos, formatos)
 - [ ] Simular actualizaciones periódicas con Celery
 
@@ -71,14 +72,15 @@ Solución end-to-end para el análisis de tendencias de compra. El sistema extra
 
 Se normalizó la información en cuatro tablas principales: Clientes, Productos, Variantes de Productos y Órdenes. Se definieron índices en los campos que se anticipan como los más utilizados para filtrar la información en el panel de control. Se establecieron valores predeterminados (`defaults`) para campos donde la ausencia de datos no afectaría significativamente el análisis estadístico. También se identificaron los campos obligatorios, cuya ausencia resultaría en la exclusión del registro para mantener la integridad de los datos esenciales.
 
-### 🔍 Validación y limpieza de datos
+### 🧼 Limpieza y Validación de Datos (ETL)
 
-Antes de cargar los datos en la base de datos, el archivo CSV pasa por un proceso de validación y limpieza dentro de la función `clean_data()`.
+Se diseñó una función de limpieza (`clean_data`) que valida la estructura del archivo CSV, descarta filas incompletas o duplicadas y aplica reglas de normalización para asegurar la coherencia de los datos antes de cargarlos en la base de datos. Se descartaron registros sin campos críticos como ID del cliente, producto o monto de compra, y se eliminaron duplicados basados en `customer id`, que se asume como identificador único.
 
-- Se verifica que el archivo contenga todas las columnas requeridas.
-- Se ignoran columnas adicionales que no forman parte del esquema esperado.
-- Se valida que los tipos de datos sean consistentes con cada campo.
-- Se comprueba que valores críticos tengan valores válidos (por ejemplo: `"Yes"`/`"No"` en campos booleanos).
+Se definieron valores por defecto basados en los modelos (`choices`) para los campos faltantes, como `"unknown"` para valores categóricos, `False` para booleanos, y mediana o moda para datos numéricos. Además, se estandarizó todo el texto a minúsculas y sin espacios extra, y se garantizó que cada producto tuviera una única categoría consistente, basada en la moda por nombre de producto.
+
+---
+
+¿Quieres que también prepare un bloque similar más adelante para `load_data()` una vez lo tengamos?
 
 ### 🧨 Filtrado de filas inválidas
 Las filas que contienen datos faltantes en alguno de los siguientes campos críticos se descartan completamente:
