@@ -5,7 +5,7 @@ from .choices import Category, Season, Size
 
 class Product(models.Model):
     id = models.AutoField("id", primary_key=True)
-    name = models.CharField("nombre del producto", max_length=100, unique=True)
+    name = models.CharField("nombre del producto", max_length=100)
     category = models.CharField(
         "categoría",
         max_length=30,
@@ -16,12 +16,18 @@ class Product(models.Model):
         "temporada",
         max_length=30,
         choices=Season.choices,
-        default=Season.NON_SEASONAL,
+        default=Season.UNKNOWN,
     )
 
     class Meta:
         verbose_name = "producto"
         verbose_name_plural = "productos"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["name", "category", "season"],
+                name="unique_product_by_name_category_season",
+            )
+        ]
         indexes = [
             models.Index(fields=["category"]),
             models.Index(fields=["season"]),
