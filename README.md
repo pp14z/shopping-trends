@@ -58,10 +58,11 @@ Solución end-to-end para el análisis de tendencias de compra. El sistema extra
 - [?] Simular actualizaciones periódicas con Celery
 
 ### **API**
-- [ ] Crear endpoint `/api/customers/insights/` para ver Customer Insights
-- [ ] Implementar filtros dinámicos
+- [X] Crear endpoint `/api/customers/insights/` para ver Customer Insights
+- [X] Implementar filtros dinámicos
 - [ ] Añadir anotaciones y agregaciones a los insights
 - [ ] Hacer pruebas del endpoint con distintos filtros y combinaciones
+- [ ] Cachear resultados e invalidarlos cuando se cargue nueva data
 
 ### **Frontend**
 - [ ] ...

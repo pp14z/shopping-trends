@@ -15,6 +15,10 @@ etl:
 test:
 	python manage.py test
 
+# Correr servidor
+runserver:
+	python manage.py runserver
+
 # Correr tests de un módulo específico: make test_module module=etl
 test_module:
 ifndef module
@@ -29,6 +33,9 @@ shell:
 # Aplicar migraciones
 migrate:
 	python manage.py migrate
+
+%:
+	@:
 
 # Comando por defecto
 .DEFAULT_GOAL := test
