@@ -53,6 +53,7 @@ Solución end-to-end para el análisis de tendencias de compra. El sistema extra
 - [X] Crear script para cargar data
 - [X] Optimizar carga con `bulk_create`
 - [X] Crear task para ejecutar el proceso ETL de forma programada
+- [X] Hacer pruebas de `clean_data` y `load_data`
 - [ ] Añadir management command para correr ETL manualmente
 - [ ] Simular actualizaciones periódicas con Celery
 
