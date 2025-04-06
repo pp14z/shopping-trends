@@ -28,7 +28,7 @@ def run_etl(csv_path):
         return
 
     try:
-        print("📦 Cargando datos a la base...")
+        print("Cargando datos a la base de datos...")
         load_data(df_clean)
     except Exception as e:  # noqa: F841
         logger.exception("Error durante la carga de datos")

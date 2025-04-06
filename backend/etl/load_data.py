@@ -1,7 +1,9 @@
+import pandas as pd
+
 from core.models import Customer, Order, Product, ProductVariant
 
 
-def load_data(df):
+def load_data(df: pd.DataFrame) -> None:
     # === CREAR CLIENTES ===
     # Filtrar los que ya existen para evitar errores de IDs duplicados
     existing_ids = set(Customer.objects.values_list("id", flat=True))

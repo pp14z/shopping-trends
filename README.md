@@ -54,11 +54,14 @@ Solución end-to-end para el análisis de tendencias de compra. El sistema extra
 - [X] Optimizar carga con `bulk_create`
 - [X] Crear task para ejecutar el proceso ETL de forma programada
 - [X] Hacer pruebas de `clean_data` y `load_data`
-- [ ] Añadir management command para correr ETL manualmente
-- [ ] Simular actualizaciones periódicas con Celery
+- [X] Añadir management command para correr ETL manualmente
+- [?] Simular actualizaciones periódicas con Celery
 
 ### **API**
-- [ ] ...
+- [ ] Crear endpoint `/api/customers/insights/` para ver Customer Insights
+- [ ] Implementar filtros dinámicos
+- [ ] Añadir anotaciones y agregaciones a los insights
+- [ ] Hacer pruebas del endpoint con distintos filtros y combinaciones
 
 ### **Frontend**
 - [ ] ...
