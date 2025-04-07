@@ -64,6 +64,7 @@ Solución end-to-end para el análisis de tendencias de compra. El sistema extra
 - [X] Hacer pruebas del endpoint con distintos filtros y combinaciones
 - [X] Configurar GitHub Actions para ejecutar pruebas del backend con Docker
 - [X] Cachear resultados e invalidarlos cuando se cargue nueva data
+- [X] Generar documentación del API
 
 ### **Frontend**
 - [ ] ...
@@ -96,6 +97,11 @@ Una vez resueltas todas las relaciones con `Customer` y `ProductVariant`, se pro
 ---
 
 ## Futuras mejoras
-- Agrupar colores de productos por sombras/color principal?
+- Agrupar colores de productos por sombras/color principal
+- Filtros cargados dinamicamente desde el API
+- Implementar Factory Boy para generar datos de prueba de forma más mantenible
+- Usar Redis como caché para mejor escalabilidad
+- Implementar autenticación y autorización para el API
+- Añadir pipeline de CI/CD completo (staging, production)
 
 ---

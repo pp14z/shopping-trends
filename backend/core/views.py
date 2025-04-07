@@ -2,11 +2,13 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db.models import Avg, Count, Sum
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, viewsets
 from rest_framework.response import Response
 
 from .filters import CustomerInsightsFilter
 from .models import Customer, Order
+from .schemas import customer_insights_schema
 from .utils import pivot_grouped_by_gender
 
 
@@ -26,6 +28,7 @@ class CustomerInsightsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     def get_queryset(self):
         return Order.objects.select_related("customer", "product_variant__product")
 
+    @extend_schema(**customer_insights_schema)
     def list(self, request, *args, **kwargs):
         cache_key = self.get_cache_key(request)
         cached_data = cache.get(cache_key)
