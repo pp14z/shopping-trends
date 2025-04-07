@@ -76,9 +76,6 @@ async function fetchApi<T>(
 
   const fullUrl = buildUrlWithParams(`${env.API_URL}${url}`, params);
 
-  // TODO: remove in production
-  console.log(fullUrl);
-
   const response = await fetch(fullUrl, {
     method,
     headers: {

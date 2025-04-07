@@ -30,8 +30,8 @@ Solución end-to-end para el análisis de tendencias de compra. El sistema extra
 
 4. **Acceder al dashboard**:
    - Abrir en el navegador: [http://localhost:3000](http://localhost:3000)
-   - La API está disponible en: [http://localhost:8000/api/](http://localhost:8000/api/)
-   - Documentación de la API: [http://localhost:8000/api/docs/](http://localhost:8000/api/schema/swagger-ui/)
+   - La API está disponible en: [http://localhost:8000/api/customers/insights/](http://localhost:8000/api/customers/insights/)
+   - Documentación de la API: [http://localhost:8000/api/docs/](http://localhost:8000/api/docs/)
 
 5. **¡Listo!** Ahora puedes explorar las tendencias de compra a través del dashboard interactivo.
 
