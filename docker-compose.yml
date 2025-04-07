@@ -15,6 +15,7 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/usr/src/app
+      - ./data:/usr/src/app/data
     environment:
       SECRET_KEY: django-insecure-secret-key
       DEBUG: "True"
