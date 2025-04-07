@@ -13,9 +13,9 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
-import { Slider } from '@/components/ui/slider';
-import { CATEGORIES, FREQUENCIES } from '@/types';
+import { CATEGORIES, FREQUENCIES, GENDERS } from '@/types';
 import { translate } from '@/utils/translation';
 
 export function Filters() {
@@ -23,79 +23,66 @@ export function Filters() {
   const searchParams = useSearchParams();
 
   // Local state for filters
-  const [filters, setFilters] = useState({
-    ageRange: [18, 70] as [number, number],
-    gender: {
-      male: true,
-      female: true,
-    },
-    subscribed: {
-      yes: true,
-      no: true,
-    },
-    purchaseFrequency: {} as Record<string, boolean>,
-    productCategory: {} as Record<string, boolean>,
-  });
+  const [productCategories, setProductCategories] = useState<
+    Record<string, boolean>
+  >({});
+  const [purchaseFrequencies, setPurchaseFrequencies] = useState<
+    Record<string, boolean>
+  >({});
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(
+    null,
+  );
+  const [gender, setGender] = useState<string | null>(null);
 
-  // Initialize frequency and category filters using constants from types
+  // Initialize filters with all unselected
   useEffect(() => {
-    setFilters((prev) => ({
-      ...prev,
-      purchaseFrequency: Object.fromEntries(
-        Object.values(FREQUENCIES).map((freq) => [freq, true]),
+    setProductCategories(
+      Object.fromEntries(Object.values(CATEGORIES).map((cat) => [cat, false])),
+    );
+    setPurchaseFrequencies(
+      Object.fromEntries(
+        Object.values(FREQUENCIES).map((freq) => [freq, false]),
       ),
-      productCategory: Object.fromEntries(
-        Object.values(CATEGORIES).map((cat) => [cat, true]),
-      ),
-    }));
+    );
   }, []);
 
   // Sync URL params to local state
   useEffect(() => {
-    const ageMin = searchParams.get('age_gte')
-      ? parseInt(searchParams.get('age_gte')!)
-      : 18;
-    const ageMax = searchParams.get('age_lte')
-      ? parseInt(searchParams.get('age_lte')!)
-      : 70;
-    const gender = searchParams.get('gender') || '';
-    const subscribed = searchParams.get('subscribed') || '';
-    const frequencies = searchParams.getAll('frequency');
     const categories = searchParams.getAll('category');
+    const frequencies = searchParams.getAll('frequency');
+    const subscribed = searchParams.get('subscribed');
+    const genderParam = searchParams.get('gender');
 
-    setFilters((prev) => ({
-      ...prev,
-      ageRange: [ageMin, ageMax],
-      gender: {
-        male: gender === 'male' || gender === '',
-        female: gender === 'female' || gender === '',
-      },
-      subscribed: {
-        yes: subscribed === 'true' || subscribed === '',
-        no: subscribed === 'false' || subscribed === '',
-      },
-      purchaseFrequency: Object.fromEntries(
+    // If no categories/frequencies in URL, all remain unselected
+    // If they exist in URL, only those are selected
+    setProductCategories(
+      Object.fromEntries(
+        Object.values(CATEGORIES).map((cat) => [cat, categories.includes(cat)]),
+      ),
+    );
+
+    setPurchaseFrequencies(
+      Object.fromEntries(
         Object.values(FREQUENCIES).map((freq) => [
           freq,
-          frequencies.includes(freq) || frequencies.length === 0,
+          frequencies.includes(freq),
         ]),
       ),
-      productCategory: Object.fromEntries(
-        Object.values(CATEGORIES).map((cat) => [
-          cat,
-          categories.includes(cat) || categories.length === 0,
-        ]),
-      ),
-    }));
+    );
+
+    // Set subscription status based on URL param
+    setSubscriptionStatus(subscribed);
+
+    // Set gender based on URL param
+    setGender(genderParam);
   }, [searchParams]);
 
   // State for collapsible sections
   const [openSections, setOpenSections] = useState({
-    age: true,
-    gender: true,
-    subscription: true,
-    frequency: true,
     category: true,
+    frequency: true,
+    subscription: true,
+    gender: true,
   });
 
   // Toggle section visibility
@@ -107,10 +94,25 @@ export function Filters() {
   };
 
   // Update URL with new filters
-  const updateFilters = (newFilters: Partial<typeof filters>) => {
+  const updateFilters = (newFilters: {
+    categories?: Record<string, boolean>;
+    frequencies?: Record<string, boolean>;
+    subscription?: string | null;
+    gender?: string | null;
+  }) => {
     // Update local state first
-    const updatedFilters = { ...filters, ...newFilters };
-    setFilters(updatedFilters);
+    if (newFilters.categories) {
+      setProductCategories(newFilters.categories);
+    }
+    if (newFilters.frequencies) {
+      setPurchaseFrequencies(newFilters.frequencies);
+    }
+    if (newFilters.subscription !== undefined) {
+      setSubscriptionStatus(newFilters.subscription);
+    }
+    if (newFilters.gender !== undefined) {
+      setGender(newFilters.gender);
+    }
 
     // Then update URL
     const url = new URL(window.location.href);
@@ -120,70 +122,69 @@ export function Filters() {
       url.searchParams.delete(key);
     });
 
-    // Add age range
-    url.searchParams.set('age_gte', updatedFilters.ageRange[0].toString());
-    url.searchParams.set('age_lte', updatedFilters.ageRange[1].toString());
+    // Add categories - only add selected ones
+    const selectedCategories = Object.entries(
+      newFilters.categories || productCategories,
+    )
+      .filter(([_, isSelected]) => isSelected)
+      .map(([cat]) => cat);
 
-    // Add gender
-    if (updatedFilters.gender.male && !updatedFilters.gender.female) {
-      url.searchParams.set('gender', 'male');
-    } else if (!updatedFilters.gender.male && updatedFilters.gender.female) {
-      url.searchParams.set('gender', 'female');
+    selectedCategories.forEach((cat) => {
+      url.searchParams.append('category', cat);
+    });
+
+    // Add frequencies - only add selected ones
+    const selectedFrequencies = Object.entries(
+      newFilters.frequencies || purchaseFrequencies,
+    )
+      .filter(([_, isSelected]) => isSelected)
+      .map(([freq]) => freq);
+
+    selectedFrequencies.forEach((freq) => {
+      url.searchParams.append('frequency', freq);
+    });
+
+    // Add gender - only if not "all"
+    const newGender =
+      newFilters.gender !== undefined ? newFilters.gender : gender;
+
+    if (newGender && newGender !== 'all') {
+      url.searchParams.set('gender', newGender);
     }
 
-    // Add subscription
-    if (updatedFilters.subscribed.yes && !updatedFilters.subscribed.no) {
-      url.searchParams.set('subscribed', 'true');
-    } else if (!updatedFilters.subscribed.yes && updatedFilters.subscribed.no) {
-      url.searchParams.set('subscribed', 'false');
+    // Add subscription status - only if not "both"
+    const newSubscription =
+      newFilters.subscription !== undefined
+        ? newFilters.subscription
+        : subscriptionStatus;
+
+    // Remove debugging console.log
+    if (newSubscription && newSubscription !== 'both') {
+      // Ensure we're passing the actual boolean value to the API
+      url.searchParams.set(
+        'subscribed',
+        newSubscription === 'true' ? 'true' : 'false',
+      );
     }
-
-    // Add frequencies
-    Object.entries(updatedFilters.purchaseFrequency).forEach(
-      ([freq, isSelected]) => {
-        if (
-          isSelected &&
-          !Object.values(updatedFilters.purchaseFrequency).every((v) => v)
-        ) {
-          url.searchParams.append('frequency', freq);
-        }
-      },
-    );
-
-    // Add categories
-    Object.entries(updatedFilters.productCategory).forEach(
-      ([cat, isSelected]) => {
-        if (
-          isSelected &&
-          !Object.values(updatedFilters.productCategory).every((v) => v)
-        ) {
-          url.searchParams.append('category', cat);
-        }
-      },
-    );
 
     router.push(url.pathname + url.search);
   };
 
   // Reset all filters
   const resetFilters = () => {
-    setFilters({
-      ageRange: [18, 70],
-      gender: {
-        male: true,
-        female: true,
-      },
-      subscribed: {
-        yes: true,
-        no: true,
-      },
-      purchaseFrequency: Object.fromEntries(
-        Object.values(FREQUENCIES).map((freq) => [freq, true]),
+    const allUnselected = {
+      categories: Object.fromEntries(
+        Object.values(CATEGORIES).map((cat) => [cat, false]),
       ),
-      productCategory: Object.fromEntries(
-        Object.values(CATEGORIES).map((cat) => [cat, true]),
+      frequencies: Object.fromEntries(
+        Object.values(FREQUENCIES).map((freq) => [freq, false]),
       ),
-    });
+    };
+
+    setProductCategories(allUnselected.categories);
+    setPurchaseFrequencies(allUnselected.frequencies);
+    setSubscriptionStatus(null);
+    setGender(null);
     router.push(window.location.pathname);
   };
 
@@ -196,7 +197,7 @@ export function Filters() {
             variant="ghost"
             size="sm"
             onClick={resetFilters}
-            className="h-8 px-2 text-muted-foreground"
+            className="text-muted-foreground h-8 px-2"
           >
             <RefreshCw className="mr-2 size-3.5" />
             Reiniciar
@@ -204,37 +205,41 @@ export function Filters() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Age Range Filter */}
+        {/* Subscription Status Filter */}
         <Collapsible
-          open={openSections.age}
-          onOpenChange={() => toggleSection('age')}
+          open={openSections.subscription}
+          onOpenChange={() => toggleSection('subscription')}
         >
           <CollapsibleTrigger className="flex w-full items-center justify-between py-1">
-            <h3 className="text-sm font-medium">Rango de Edad</h3>
-            {openSections.age ? (
-              <ChevronUp className="size-4 text-muted-foreground" />
+            <h3 className="text-sm font-medium">Estado de Suscripción</h3>
+            {openSections.subscription ? (
+              <ChevronUp className="text-muted-foreground size-4" />
             ) : (
-              <ChevronDown className="size-4 text-muted-foreground" />
+              <ChevronDown className="text-muted-foreground size-4" />
             )}
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-2">
-            <div className="space-y-4">
-              <Slider
-                value={filters.ageRange}
-                min={18}
-                max={70}
-                step={1}
-                onValueChange={(value) => {
-                  updateFilters({
-                    ageRange: value as [number, number],
-                  });
-                }}
-              />
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>{filters.ageRange[0]}</span>
-                <span>{filters.ageRange[1]}</span>
+            <RadioGroup
+              value={subscriptionStatus || 'both'}
+              onValueChange={(value) => {
+                updateFilters({
+                  subscription: value,
+                });
+              }}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="both" id="subscription-both" />
+                <Label htmlFor="subscription-both">Todos</Label>
               </div>
-            </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="true" id="subscription-yes" />
+                <Label htmlFor="subscription-yes">Suscrito</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="false" id="subscription-no" />
+                <Label htmlFor="subscription-no">No Suscrito</Label>
+              </div>
+            </RadioGroup>
           </CollapsibleContent>
         </Collapsible>
 
@@ -248,94 +253,75 @@ export function Filters() {
           <CollapsibleTrigger className="flex w-full items-center justify-between py-1">
             <h3 className="text-sm font-medium">Género</h3>
             {openSections.gender ? (
-              <ChevronUp className="size-4 text-muted-foreground" />
+              <ChevronUp className="text-muted-foreground size-4" />
             ) : (
-              <ChevronDown className="size-4 text-muted-foreground" />
+              <ChevronDown className="text-muted-foreground size-4" />
             )}
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-2">
-            <div className="space-y-2">
+            <RadioGroup
+              value={gender || 'all'}
+              onValueChange={(value) => {
+                updateFilters({
+                  gender: value === 'all' ? null : value,
+                });
+              }}
+            >
               <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="gender-male"
-                  checked={filters.gender.male}
-                  onCheckedChange={(checked) => {
-                    updateFilters({
-                      gender: {
-                        ...filters.gender,
-                        male: !!checked,
-                      },
-                    });
-                  }}
-                />
-                <Label htmlFor="gender-male">Masculino</Label>
+                <RadioGroupItem value="all" id="gender-all" />
+                <Label htmlFor="gender-all">Todos</Label>
               </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="gender-female"
-                  checked={filters.gender.female}
-                  onCheckedChange={(checked) => {
-                    updateFilters({
-                      gender: {
-                        ...filters.gender,
-                        female: !!checked,
-                      },
-                    });
-                  }}
-                />
-                <Label htmlFor="gender-female">Femenino</Label>
-              </div>
-            </div>
+              {Object.values(GENDERS).map((genderOption) => (
+                <div key={genderOption} className="flex items-center space-x-2">
+                  <RadioGroupItem
+                    value={genderOption}
+                    id={`gender-${genderOption}`}
+                  />
+                  <Label htmlFor={`gender-${genderOption}`}>
+                    {translate.gender(genderOption)}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
           </CollapsibleContent>
         </Collapsible>
 
         <Separator />
 
-        {/* Subscription Filter */}
+        {/* Product Category Filter */}
         <Collapsible
-          open={openSections.subscription}
-          onOpenChange={() => toggleSection('subscription')}
+          open={openSections.category}
+          onOpenChange={() => toggleSection('category')}
         >
           <CollapsibleTrigger className="flex w-full items-center justify-between py-1">
-            <h3 className="text-sm font-medium">Estado de Suscripción</h3>
-            {openSections.subscription ? (
-              <ChevronUp className="size-4 text-muted-foreground" />
+            <h3 className="text-sm font-medium">Categoría de Producto</h3>
+            {openSections.category ? (
+              <ChevronUp className="text-muted-foreground size-4" />
             ) : (
-              <ChevronDown className="size-4 text-muted-foreground" />
+              <ChevronDown className="text-muted-foreground size-4" />
             )}
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-2">
             <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="subscribed-yes"
-                  checked={filters.subscribed.yes}
-                  onCheckedChange={(checked) => {
-                    updateFilters({
-                      subscribed: {
-                        ...filters.subscribed,
-                        yes: !!checked,
-                      },
-                    });
-                  }}
-                />
-                <Label htmlFor="subscribed-yes">Suscrito</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="subscribed-no"
-                  checked={filters.subscribed.no}
-                  onCheckedChange={(checked) => {
-                    updateFilters({
-                      subscribed: {
-                        ...filters.subscribed,
-                        no: !!checked,
-                      },
-                    });
-                  }}
-                />
-                <Label htmlFor="subscribed-no">No Suscrito</Label>
-              </div>
+              {Object.values(CATEGORIES).map((category) => (
+                <div key={category} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`category-${category}`}
+                    checked={productCategories[category]}
+                    onCheckedChange={(checked) => {
+                      updateFilters({
+                        categories: {
+                          ...productCategories,
+                          [category]: !!checked,
+                        },
+                      });
+                    }}
+                  />
+                  <Label htmlFor={`category-${category}`}>
+                    {translate.category(category)}
+                  </Label>
+                </div>
+              ))}
             </div>
           </CollapsibleContent>
         </Collapsible>
@@ -350,9 +336,9 @@ export function Filters() {
           <CollapsibleTrigger className="flex w-full items-center justify-between py-1">
             <h3 className="text-sm font-medium">Frecuencia de Compra</h3>
             {openSections.frequency ? (
-              <ChevronUp className="size-4 text-muted-foreground" />
+              <ChevronUp className="text-muted-foreground size-4" />
             ) : (
-              <ChevronDown className="size-4 text-muted-foreground" />
+              <ChevronDown className="text-muted-foreground size-4" />
             )}
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-2">
@@ -361,11 +347,11 @@ export function Filters() {
                 <div key={frequency} className="flex items-center space-x-2">
                   <Checkbox
                     id={`frequency-${frequency}`}
-                    checked={filters.purchaseFrequency[frequency]}
+                    checked={purchaseFrequencies[frequency]}
                     onCheckedChange={(checked) => {
                       updateFilters({
-                        purchaseFrequency: {
-                          ...filters.purchaseFrequency,
+                        frequencies: {
+                          ...purchaseFrequencies,
                           [frequency]: !!checked,
                         },
                       });
@@ -373,46 +359,6 @@ export function Filters() {
                   />
                   <Label htmlFor={`frequency-${frequency}`}>
                     {translate.frequency(frequency)}
-                  </Label>
-                </div>
-              ))}
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
-
-        <Separator />
-
-        {/* Product Category Filter */}
-        <Collapsible
-          open={openSections.category}
-          onOpenChange={() => toggleSection('category')}
-        >
-          <CollapsibleTrigger className="flex w-full items-center justify-between py-1">
-            <h3 className="text-sm font-medium">Categoría de Producto</h3>
-            {openSections.category ? (
-              <ChevronUp className="size-4 text-muted-foreground" />
-            ) : (
-              <ChevronDown className="size-4 text-muted-foreground" />
-            )}
-          </CollapsibleTrigger>
-          <CollapsibleContent className="pt-2">
-            <div className="space-y-2">
-              {Object.values(CATEGORIES).map((category) => (
-                <div key={category} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`category-${category}`}
-                    checked={filters.productCategory[category]}
-                    onCheckedChange={(checked) => {
-                      updateFilters({
-                        productCategory: {
-                          ...filters.productCategory,
-                          [category]: !!checked,
-                        },
-                      });
-                    }}
-                  />
-                  <Label htmlFor={`category-${category}`}>
-                    {translate.category(category)}
                   </Label>
                 </div>
               ))}

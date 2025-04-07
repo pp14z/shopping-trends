@@ -1,6 +1,7 @@
 import django_filters
 
 from core.models import Order
+from core.models.choices import Category, PurchaseFrequency
 
 
 class CustomerInsightsFilter(django_filters.FilterSet):
@@ -12,12 +13,16 @@ class CustomerInsightsFilter(django_filters.FilterSet):
     subscribed = django_filters.BooleanFilter(
         field_name="customer__subscription_status"
     )
-    frequency = django_filters.AllValuesMultipleFilter(
+    # Replace AllValuesMultipleFilter with MultipleChoiceFilter for frequency
+    frequency = django_filters.MultipleChoiceFilter(
         field_name="customer__frequency_of_purchases",
+        choices=PurchaseFrequency.choices,
         conjoined=False,
     )
-    category = django_filters.AllValuesMultipleFilter(
+    # Replace AllValuesMultipleFilter with MultipleChoiceFilter
+    category = django_filters.MultipleChoiceFilter(
         field_name="product_variant__product__category",
+        choices=Category.choices,
         conjoined=False,
     )
 

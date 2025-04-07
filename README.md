@@ -10,9 +10,34 @@ Solución end-to-end para el análisis de tendencias de compra. El sistema extra
 - **Frontend**: Next.js, TypeScript, Shadcn/ui
 - **Infraestructura**: Docker-compose
 
+## 🚀 Instrucciones de uso
+
+1. **Clonar el repositorio e ingresar al directorio**:
+   ```bash
+   git clone <url-del-repositorio>
+   cd shopping-trends
+   ```
+
+2. **Iniciar los servicios con Docker Compose**:
+   ```bash
+   docker-compose up -d --build
+   ```
+
+3. **Ejecutar el proceso ETL para cargar los datos**:
+   ```bash
+   docker-compose exec backend make etl /data/shopping_trends.csv
+   ```
+
+4. **Acceder al dashboard**:
+   - Abrir en el navegador: [http://localhost:3000](http://localhost:3000)
+   - La API está disponible en: [http://localhost:8000/api/](http://localhost:8000/api/)
+   - Documentación de la API: [http://localhost:8000/api/docs/](http://localhost:8000/api/schema/swagger-ui/)
+
+5. **¡Listo!** Ahora puedes explorar las tendencias de compra a través del dashboard interactivo.
+
 ---
 
-## 🚀 Funcionalidades Clave
+## Funcionalidades Clave
 
 ### ETL
 - Ingesta de datos simulando una carga desde S3 (archivo CSV local).
@@ -23,12 +48,12 @@ Solución end-to-end para el análisis de tendencias de compra. El sistema extra
 
 ### API REST
 - Endpoints organizados por recurso: clientes, productos, ventas.
-- Soporte para filtros y búsquedas por parámetros clave.
-- Documentación generada automáticamente con Swagger / OpenAPI.
+- Soporte para filtros.
+- Documentación generada automáticamente con OpenAPI.
 - Validación de datos y manejo de errores consistente.
 
 ### Dashboard Interactivo
-- Visualización de KPIs: ventas totales, productos más vendidos, ingresos promedio por categoría.
+- Visualización de KPIs: ventas totales, segmentacio por edad, cateogorías más vendidos, ingresos promedio por categoría.
 - Gráficos dinámicos integrados con Chart.js o Recharts.
 - Filtros interactivos por categoría, temporada y método de pago.
 - Interfaz moderna desarrollada en Next.js con TypeScript y Shadcn/ui.
@@ -37,43 +62,6 @@ Solución end-to-end para el análisis de tendencias de compra. El sistema extra
 - Proyecto dockerizado: backend, frontend y base de datos.
 - Scripts reproducibles para carga de datos y entorno local.
 - Preparado para integración continua y despliegue automatizado.
-
----
-
-## ✅ TODO
-
-### **Setup Inicial**
-- [X] Estructura de proyecto (backend/frontend/data)
-- [X] Setup de Django y DRF
-- [X] Configurar Docker-compose
-- [X] Crear modelos base
-
-### **ETL**
-- [X] Crear script para limpiar y validar data
-- [X] Crear script para cargar data
-- [X] Optimizar carga con `bulk_create`
-- [X] Crear task para ejecutar el proceso ETL de forma programada
-- [X] Hacer pruebas de `clean_data` y `load_data`
-- [X] Añadir management command para correr ETL manualmente
-- [?] Simular actualizaciones periódicas con Celery
-
-### **API**
-- [X] Crear endpoint `/api/customers/insights/` para ver Customer Insights
-- [X] Implementar filtros dinámicos
-- [X] Añadir anotaciones y agregaciones a los insights
-- [X] Hacer pruebas del endpoint con distintos filtros y combinaciones
-- [X] Configurar GitHub Actions para ejecutar pruebas del backend con Docker
-- [X] Cachear resultados e invalidarlos cuando se cargue nueva data
-- [X] Generar documentación del API
-
-### **Frontend**
-- [X] Configuracion inicial del proyecto
-- [X] Configurar rutas y estructura base del proyecto
-- [X] Instalar y configurar Shadcn/UI y Recharts
-- [ ] Configurar react-query y filtros
-
-### **Deployment**
-- [ ] ...
 
 ---
 
@@ -113,6 +101,20 @@ El endpoint `/api/customers/insights/` fue diseñado para proporcionar estadíst
 
 - **Documentación OpenAPI:** Se usó `drf-spectacular` para documentar parámetros de filtro, estructuras de respuesta y tipos de datos, asegurando que el frontend tenga una referencia clara de cómo consumir el endpoint.
 
+### 🖥️ Arquitectura del Frontend
+
+Se optó por Next.js y React como base del frontend por su robustez, amplia adopción en la industria y excelente soporte para aplicaciones de datos. Algunas decisiones clave:
+
+- **Next.js**: Seleccionado por su renderizado híbrido (SSR/CSR) que optimiza tanto el SEO como la experiencia de usuario, y su sistema de rutas simplificado que facilita la navegación entre secciones del dashboard.
+
+- **TypeScript**: Implementado para garantizar la integridad de tipos entre el frontend y la API, reduciendo errores en tiempo de ejecución y mejorando la autocompletación durante el desarrollo.
+
+- **Shadcn/UI**: Elegido como sistema de componentes por su enfoque no intrusivo, alta personalización y componentes accesibles que aceleraron el desarrollo sin sacrificar la flexibilidad del diseño.
+
+- **Recharts**: Utilizado para visualizaciones por su API declarativa compatible con React, optimización de rendimiento y capacidad para manejar grandes conjuntos de datos con actualizaciones eficientes del DOM.
+
+- **Arquitectura de estado**: Se implementó un patrón de gestión de estado centralizado para los filtros, permitiendo que múltiples componentes de visualización reaccionen a los mismos cambios de filtro sin acoplamiento directo.
+
 ---
 
 ## Futuras mejoras
@@ -122,5 +124,41 @@ El endpoint `/api/customers/insights/` fue diseñado para proporcionar estadíst
 - Usar Redis como caché para mejor escalabilidad
 - Implementar autenticación y autorización para el API
 - Añadir pipeline de CI/CD completo (staging, production)
+- Implementar react-query para cachear en el front-end tambien.
+
+---
+
+## ✅ TODO
+
+### **Setup Inicial**
+- [X] Estructura de proyecto (backend/frontend/data)
+- [X] Setup de Django y DRF
+- [X] Configurar Docker-compose
+- [X] Crear modelos base
+
+### **ETL**
+- [X] Crear script para limpiar y validar data
+- [X] Crear script para cargar data
+- [X] Optimizar carga con `bulk_create`
+- [X] Crear task para ejecutar el proceso ETL de forma programada
+- [X] Hacer pruebas de `clean_data` y `load_data`
+- [X] Añadir management command para correr ETL manualmente
+- [?] Simular actualizaciones periódicas con Celery
+
+### **API**
+- [X] Crear endpoint `/api/customers/insights/` para ver Customer Insights
+- [X] Implementar filtros dinámicos
+- [X] Añadir anotaciones y agregaciones a los insights
+- [X] Hacer pruebas del endpoint con distintos filtros y combinaciones
+- [X] Configurar GitHub Actions para ejecutar pruebas del backend con Docker
+- [X] Cachear resultados e invalidarlos cuando se cargue nueva data
+- [X] Generar documentación del API
+
+### **Frontend**
+- [X] Configuracion inicial del proyecto
+- [X] Configurar rutas y estructura base del proyecto
+- [X] Instalar y configurar Shadcn/UI y Recharts
+- [X] Configurar filtros
+- [X] Añadir Dockerfile
 
 ---

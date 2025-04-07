@@ -7,7 +7,14 @@ export const customerInsightsParamsSchema = z
     age_gte: z.coerce.number().min(0).optional(),
     age_lte: z.coerce.number().min(0).optional(),
     gender: z.nativeEnum(GENDERS).optional(),
-    subscribed: z.coerce.boolean().optional(),
+    // Change this to handle string values properly
+    subscribed: z
+      .union([
+        z.literal('true').transform(() => true),
+        z.literal('false').transform(() => false),
+        z.boolean(),
+      ])
+      .optional(),
     frequency: z.array(z.nativeEnum(FREQUENCIES)).optional(),
     category: z.array(z.nativeEnum(CATEGORIES)).optional(),
   })
