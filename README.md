@@ -94,6 +94,22 @@ Para evitar errores por duplicados en clientes, se consultaron previamente los `
 
 Una vez resueltas todas las relaciones con `Customer` y `ProductVariant`, se procedió a insertar las órdenes también mediante `bulk_create`. Este enfoque asegura una carga de datos robusta, eficiente y libre de errores de integridad, optimizada para grandes volúmenes de información.
 
+### 📊 Diseño del API
+
+El endpoint `/api/customers/insights/` fue diseñado para proporcionar estadísticas clave sobre los clientes y sus patrones de compra a través de una única consulta altamente personalizable. Algunas decisiones clave:
+
+- **Queryset principal:** Se utiliza `Order.objects.select_related(...)` como base, ya que los filtros como categoría de producto o frecuencia de compra dependen tanto de los datos del cliente como del producto. A partir de las órdenes se construye el conjunto de clientes únicos.
+
+- **Filtrado:** Se implementó `DjangoFilterBackend` con una clase de filtro personalizada `CustomerInsightsFilter`, lo que permite aplicar filtros como `gender`, `age range`, `subscription`, `purchase frequency`, y `product category` directamente desde los query params del cliente.
+
+- **Agregaciones:** Las métricas como `total_sales`, `average_order_value`, `avg_review_rating`, etc., se calculan usando agregaciones (`Avg`, `Sum`, `Count`) directamente sobre el queryset filtrado.
+
+- **Distribuciones:** Para visualizaciones front-end como gráficos de barras o stacked charts, se generaron distribuciones pivotadas por género (ej. `customer_distribution_by_age`, `total_sales_by_category_gender`, etc.) usando una utilidad (`pivot_grouped_by_gender`) que transforma los resultados en un formato amigable para el frontend.
+
+- **Rendimiento:** Se implementó caching con invalidación automática cuando se corre nuevamente el ETL. La clave del cache se construye a partir de los filtros aplicados.
+
+- **Documentación OpenAPI:** Se usó `drf-spectacular` para documentar parámetros de filtro, estructuras de respuesta y tipos de datos, asegurando que el frontend tenga una referencia clara de cómo consumir el endpoint.
+
 ---
 
 ## Futuras mejoras
