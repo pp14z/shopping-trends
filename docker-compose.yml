@@ -29,8 +29,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - APP_URL=http://localhost:3000
-      - API_URL=http://localhost:8000
+      - NEXT_PUBLIC_APP_URL=http://localhost:3000
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
     depends_on:
       - backend
 

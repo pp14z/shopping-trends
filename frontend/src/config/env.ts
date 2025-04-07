@@ -4,7 +4,7 @@ import 'dotenv/config';
 const createEnv = () => {
   const EnvSchema = z.object({
     APP_URL: z.string().optional().default('http://localhost:3000'),
-    API_URL: z.string(),
+    API_URL: z.string().optional().default('http://localhost:8000'),
   });
 
   const envVars = {
