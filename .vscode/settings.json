@@ -3,7 +3,8 @@
   "editor.tabSize": 2,
   "editor.detectIndentation": false,
   "search.exclude": {
-    "pnpm-lock.json": true
+    "pnpm-lock.json": true,
+    "**/node_modules": true
   },
 
   // Python/Django settings
@@ -20,22 +21,22 @@
   "isort.args": ["--settings-path=${workspaceFolder}/backend/setup.cfg"],
 
   // TypeScript/Next.js settings
-  "typescript.tsdk": "frontend/node_modules/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.tsdk": "node_modules/typescript/lib",
   "typescript.preferences.autoImportFileExcludePatterns": [
     "next/router.d.ts",
     "next/dist/client/router.d.ts",
     "lucide-react"
   ],
   "typescript.preferences.preferTypeOnlyAutoImports": true,
-
+  
   // Frontend formatting
   "prettier.enable": false,
   "editor.formatOnSave": false,
-  "editor.codeActionsOnSave": [
-    "source.addMissingImports",
-    "source.fixAll.eslint"
-  ],
+  "editor.codeActionsOnSave": {
+    "source.addMissingImports": "explicit",
+    "source.fixAll.eslint": "explicit"
+  },
 
   // ESLint configuration
   "eslint.format.enable": true,
@@ -45,5 +46,5 @@
     "typescript",
     "typescriptreact",
     "yaml"
-  ]
+  ],
 }
