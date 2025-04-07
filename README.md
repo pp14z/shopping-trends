@@ -69,7 +69,8 @@ Solución end-to-end para el análisis de tendencias de compra. El sistema extra
 ### **Frontend**
 - [X] Configuracion inicial del proyecto
 - [X] Configurar rutas y estructura base del proyecto
-- [ ] Instalar y configurar Shadcn/UI y Recharts
+- [X] Instalar y configurar Shadcn/UI y Recharts
+- [ ] Configurar react-query y filtros
 
 ### **Deployment**
 - [ ] ...

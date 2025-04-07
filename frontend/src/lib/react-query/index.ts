@@ -5,7 +5,7 @@ export const queryConfig = {
     throwOnError: true,
     refetchOnWindowFocus: false,
     retry: false,
-    staleTime: 1000 * 60 * 1,
+    staleTime: 1000 * 60 * 1, // Cachear queries por un minuto
   },
 } satisfies DefaultOptions;
 
