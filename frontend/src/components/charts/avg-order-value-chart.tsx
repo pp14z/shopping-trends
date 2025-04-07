@@ -16,17 +16,13 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
+import { translate } from '@/utils/translation';
 
 interface AvgOrderValueChartProps {
   data: Array<{ category: string; male: number; female: number }>;
 }
 
 export function AvgOrderValueChart({ data }: AvgOrderValueChartProps) {
-  // Format category names for better display
-  const formatCategory = (category: string) => {
-    return category.charAt(0).toUpperCase() + category.slice(1);
-  };
-
   // Format currency
   const formatCurrency = (value: number) => {
     return `$${value.toFixed(2)}`;
@@ -34,7 +30,7 @@ export function AvgOrderValueChart({ data }: AvgOrderValueChartProps) {
 
   // Transform data for better display
   const chartData = data.map((item) => ({
-    name: formatCategory(item.category),
+    name: translate.category(item.category),
     male: item.male,
     female: item.female,
   }));
@@ -65,10 +61,12 @@ export function AvgOrderValueChart({ data }: AvgOrderValueChartProps) {
                         <div>
                           <div className="text-sm font-medium">{label}</div>
                           <div className="text-sm">
-                            Male: {formatCurrency(payload[0].value as number)}
+                            Masculino:{' '}
+                            {formatCurrency(payload[0].value as number)}
                           </div>
                           <div className="text-sm">
-                            Female: {formatCurrency(payload[1].value as number)}
+                            Femenino:{' '}
+                            {formatCurrency(payload[1].value as number)}
                           </div>
                         </div>
                       }
@@ -80,8 +78,8 @@ export function AvgOrderValueChart({ data }: AvgOrderValueChartProps) {
             }}
           />
           <Legend />
-          <Bar dataKey="male" fill="#5352ed" name="Male" />
-          <Bar dataKey="female" fill="#ff6b81" name="Female" />
+          <Bar dataKey="male" fill="#5352ed" name="Masculino" />
+          <Bar dataKey="female" fill="#ff6b81" name="Femenino" />
         </BarChart>
       </ResponsiveContainer>
     </ChartContainer>

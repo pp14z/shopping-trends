@@ -26,7 +26,7 @@ export function SubscriptionDistributionChart({
 }: SubscriptionDistributionChartProps) {
   // Transform data for better display
   const chartData = data.map((item) => ({
-    name: item.subscription_status ? 'Subscribed' : 'Not Subscribed',
+    name: item.subscription_status ? 'Suscrito' : 'No suscrito',
     male: item.male,
     female: item.female,
   }));
@@ -61,10 +61,10 @@ export function SubscriptionDistributionChart({
                         <div>
                           <div className="text-sm font-medium">{label}</div>
                           <div className="text-sm">
-                            Male: {payload[0].value}
+                            Masculino: {payload[0].value}
                           </div>
                           <div className="text-sm">
-                            Female: {payload[1].value}
+                            Femenino: {payload[1].value}
                           </div>
                           <div className="mt-1 text-sm font-medium">
                             Total: {total}
@@ -79,8 +79,8 @@ export function SubscriptionDistributionChart({
             }}
           />
           <Legend />
-          <Bar dataKey="male" stackId="a" fill="#5352ed" name="Male" />
-          <Bar dataKey="female" stackId="a" fill="#ff6b81" name="Female" />
+          <Bar dataKey="male" stackId="a" fill="#5352ed" name="Masculino" />
+          <Bar dataKey="female" stackId="a" fill="#ff6b81" name="Femenino" />
         </BarChart>
       </ResponsiveContainer>
     </ChartContainer>

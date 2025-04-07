@@ -37,7 +37,7 @@ export function AgeDistributionChart({ data }: AgeDistributionChartProps) {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis
             dataKey="age"
-            label={{ value: 'Age', position: 'insideBottom', offset: -5 }}
+            label={{ value: 'Edad', position: 'insideBottom', offset: -5 }}
           />
           <YAxis />
           <Tooltip
@@ -54,13 +54,13 @@ export function AgeDistributionChart({ data }: AgeDistributionChartProps) {
                       content={
                         <div>
                           <div className="text-sm font-medium">
-                            Age: {label}
+                            Edad: {label}
                           </div>
                           <div className="text-sm">
-                            Male: {payload[0].value}
+                            Masculino: {payload[0].value}
                           </div>
                           <div className="text-sm">
-                            Female: {payload[1].value}
+                            Femenino: {payload[1].value}
                           </div>
                           <div className="mt-1 text-sm font-medium">
                             Total: {total}
@@ -75,8 +75,8 @@ export function AgeDistributionChart({ data }: AgeDistributionChartProps) {
             }}
           />
           <Legend />
-          <Bar dataKey="male" stackId="a" fill="#5352ed" name="Male" />
-          <Bar dataKey="female" stackId="a" fill="#ff6b81" name="Female" />
+          <Bar dataKey="male" stackId="a" fill="#5352ed" name="Masculino" />
+          <Bar dataKey="female" stackId="a" fill="#ff6b81" name="Femenino" />
         </BarChart>
       </ResponsiveContainer>
     </ChartContainer>

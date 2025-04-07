@@ -1,7 +1,8 @@
 'use client';
 
 import { ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
-import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,32 +15,80 @@ import {
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
+import { CATEGORIES, FREQUENCIES } from '@/types';
+import { translate } from '@/utils/translation';
 
-interface FilterCardProps {
-  filters: {
-    ageRange: [number, number];
+export function Filters() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Local state for filters
+  const [filters, setFilters] = useState({
+    ageRange: [18, 70] as [number, number],
     gender: {
-      male: boolean;
-      female: boolean;
-    };
+      male: true,
+      female: true,
+    },
     subscribed: {
-      yes: boolean;
-      no: boolean;
-    };
-    purchaseFrequency: Record<string, boolean>;
-    productCategory: Record<string, boolean>;
-  };
-  onFilterChange: (filters: any) => void;
-  purchaseFrequencies: string[];
-  productCategories: string[];
-}
+      yes: true,
+      no: true,
+    },
+    purchaseFrequency: {} as Record<string, boolean>,
+    productCategory: {} as Record<string, boolean>,
+  });
 
-export function FilterCard({
-  filters,
-  onFilterChange,
-  purchaseFrequencies,
-  productCategories,
-}: FilterCardProps) {
+  // Initialize frequency and category filters using constants from types
+  useEffect(() => {
+    setFilters((prev) => ({
+      ...prev,
+      purchaseFrequency: Object.fromEntries(
+        Object.values(FREQUENCIES).map((freq) => [freq, true]),
+      ),
+      productCategory: Object.fromEntries(
+        Object.values(CATEGORIES).map((cat) => [cat, true]),
+      ),
+    }));
+  }, []);
+
+  // Sync URL params to local state
+  useEffect(() => {
+    const ageMin = searchParams.get('age_gte')
+      ? parseInt(searchParams.get('age_gte')!)
+      : 18;
+    const ageMax = searchParams.get('age_lte')
+      ? parseInt(searchParams.get('age_lte')!)
+      : 70;
+    const gender = searchParams.get('gender') || '';
+    const subscribed = searchParams.get('subscribed') || '';
+    const frequencies = searchParams.getAll('frequency');
+    const categories = searchParams.getAll('category');
+
+    setFilters((prev) => ({
+      ...prev,
+      ageRange: [ageMin, ageMax],
+      gender: {
+        male: gender === 'male' || gender === '',
+        female: gender === 'female' || gender === '',
+      },
+      subscribed: {
+        yes: subscribed === 'true' || subscribed === '',
+        no: subscribed === 'false' || subscribed === '',
+      },
+      purchaseFrequency: Object.fromEntries(
+        Object.values(FREQUENCIES).map((freq) => [
+          freq,
+          frequencies.includes(freq) || frequencies.length === 0,
+        ]),
+      ),
+      productCategory: Object.fromEntries(
+        Object.values(CATEGORIES).map((cat) => [
+          cat,
+          categories.includes(cat) || categories.length === 0,
+        ]),
+      ),
+    }));
+  }, [searchParams]);
+
   // State for collapsible sections
   const [openSections, setOpenSections] = useState({
     age: true,
@@ -57,22 +106,68 @@ export function FilterCard({
     }));
   };
 
-  // Format frequency labels for better display
-  const formatFrequency = (frequency: string) => {
-    return frequency
-      .split(' ')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  };
+  // Update URL with new filters
+  const updateFilters = (newFilters: Partial<typeof filters>) => {
+    // Update local state first
+    const updatedFilters = { ...filters, ...newFilters };
+    setFilters(updatedFilters);
 
-  // Format category names for better display
-  const formatCategory = (category: string) => {
-    return category.charAt(0).toUpperCase() + category.slice(1);
+    // Then update URL
+    const url = new URL(window.location.href);
+
+    // Clear existing params
+    Array.from(url.searchParams.keys()).forEach((key) => {
+      url.searchParams.delete(key);
+    });
+
+    // Add age range
+    url.searchParams.set('age_gte', updatedFilters.ageRange[0].toString());
+    url.searchParams.set('age_lte', updatedFilters.ageRange[1].toString());
+
+    // Add gender
+    if (updatedFilters.gender.male && !updatedFilters.gender.female) {
+      url.searchParams.set('gender', 'male');
+    } else if (!updatedFilters.gender.male && updatedFilters.gender.female) {
+      url.searchParams.set('gender', 'female');
+    }
+
+    // Add subscription
+    if (updatedFilters.subscribed.yes && !updatedFilters.subscribed.no) {
+      url.searchParams.set('subscribed', 'true');
+    } else if (!updatedFilters.subscribed.yes && updatedFilters.subscribed.no) {
+      url.searchParams.set('subscribed', 'false');
+    }
+
+    // Add frequencies
+    Object.entries(updatedFilters.purchaseFrequency).forEach(
+      ([freq, isSelected]) => {
+        if (
+          isSelected &&
+          !Object.values(updatedFilters.purchaseFrequency).every((v) => v)
+        ) {
+          url.searchParams.append('frequency', freq);
+        }
+      },
+    );
+
+    // Add categories
+    Object.entries(updatedFilters.productCategory).forEach(
+      ([cat, isSelected]) => {
+        if (
+          isSelected &&
+          !Object.values(updatedFilters.productCategory).every((v) => v)
+        ) {
+          url.searchParams.append('category', cat);
+        }
+      },
+    );
+
+    router.push(url.pathname + url.search);
   };
 
   // Reset all filters
   const resetFilters = () => {
-    onFilterChange({
+    setFilters({
       ageRange: [18, 70],
       gender: {
         male: true,
@@ -83,19 +178,20 @@ export function FilterCard({
         no: true,
       },
       purchaseFrequency: Object.fromEntries(
-        purchaseFrequencies.map((freq) => [freq, true]),
+        Object.values(FREQUENCIES).map((freq) => [freq, true]),
       ),
       productCategory: Object.fromEntries(
-        productCategories.map((category) => [category, true]),
+        Object.values(CATEGORIES).map((cat) => [cat, true]),
       ),
     });
+    router.push(window.location.pathname);
   };
 
   return (
     <Card className="sticky top-4 h-full">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle>Filters</CardTitle>
+          <CardTitle>Filtros</CardTitle>
           <Button
             variant="ghost"
             size="sm"
@@ -103,7 +199,7 @@ export function FilterCard({
             className="h-8 px-2 text-muted-foreground"
           >
             <RefreshCw className="mr-2 size-3.5" />
-            Reset
+            Reiniciar
           </Button>
         </div>
       </CardHeader>
@@ -114,7 +210,7 @@ export function FilterCard({
           onOpenChange={() => toggleSection('age')}
         >
           <CollapsibleTrigger className="flex w-full items-center justify-between py-1">
-            <h3 className="text-sm font-medium">Age Range</h3>
+            <h3 className="text-sm font-medium">Rango de Edad</h3>
             {openSections.age ? (
               <ChevronUp className="size-4 text-muted-foreground" />
             ) : (
@@ -128,9 +224,11 @@ export function FilterCard({
                 min={18}
                 max={70}
                 step={1}
-                onValueChange={(value) =>
-                  onFilterChange({ ageRange: value as [number, number] })
-                }
+                onValueChange={(value) => {
+                  updateFilters({
+                    ageRange: value as [number, number],
+                  });
+                }}
               />
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>{filters.ageRange[0]}</span>
@@ -148,7 +246,7 @@ export function FilterCard({
           onOpenChange={() => toggleSection('gender')}
         >
           <CollapsibleTrigger className="flex w-full items-center justify-between py-1">
-            <h3 className="text-sm font-medium">Gender</h3>
+            <h3 className="text-sm font-medium">Género</h3>
             {openSections.gender ? (
               <ChevronUp className="size-4 text-muted-foreground" />
             ) : (
@@ -161,25 +259,31 @@ export function FilterCard({
                 <Checkbox
                   id="gender-male"
                   checked={filters.gender.male}
-                  onCheckedChange={(checked) =>
-                    onFilterChange({
-                      gender: { ...filters.gender, male: !!checked },
-                    })
-                  }
+                  onCheckedChange={(checked) => {
+                    updateFilters({
+                      gender: {
+                        ...filters.gender,
+                        male: !!checked,
+                      },
+                    });
+                  }}
                 />
-                <Label htmlFor="gender-male">Male</Label>
+                <Label htmlFor="gender-male">Masculino</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="gender-female"
                   checked={filters.gender.female}
-                  onCheckedChange={(checked) =>
-                    onFilterChange({
-                      gender: { ...filters.gender, female: !!checked },
-                    })
-                  }
+                  onCheckedChange={(checked) => {
+                    updateFilters({
+                      gender: {
+                        ...filters.gender,
+                        female: !!checked,
+                      },
+                    });
+                  }}
                 />
-                <Label htmlFor="gender-female">Female</Label>
+                <Label htmlFor="gender-female">Femenino</Label>
               </div>
             </div>
           </CollapsibleContent>
@@ -193,7 +297,7 @@ export function FilterCard({
           onOpenChange={() => toggleSection('subscription')}
         >
           <CollapsibleTrigger className="flex w-full items-center justify-between py-1">
-            <h3 className="text-sm font-medium">Subscription Status</h3>
+            <h3 className="text-sm font-medium">Estado de Suscripción</h3>
             {openSections.subscription ? (
               <ChevronUp className="size-4 text-muted-foreground" />
             ) : (
@@ -206,25 +310,31 @@ export function FilterCard({
                 <Checkbox
                   id="subscribed-yes"
                   checked={filters.subscribed.yes}
-                  onCheckedChange={(checked) =>
-                    onFilterChange({
-                      subscribed: { ...filters.subscribed, yes: !!checked },
-                    })
-                  }
+                  onCheckedChange={(checked) => {
+                    updateFilters({
+                      subscribed: {
+                        ...filters.subscribed,
+                        yes: !!checked,
+                      },
+                    });
+                  }}
                 />
-                <Label htmlFor="subscribed-yes">Subscribed</Label>
+                <Label htmlFor="subscribed-yes">Suscrito</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="subscribed-no"
                   checked={filters.subscribed.no}
-                  onCheckedChange={(checked) =>
-                    onFilterChange({
-                      subscribed: { ...filters.subscribed, no: !!checked },
-                    })
-                  }
+                  onCheckedChange={(checked) => {
+                    updateFilters({
+                      subscribed: {
+                        ...filters.subscribed,
+                        no: !!checked,
+                      },
+                    });
+                  }}
                 />
-                <Label htmlFor="subscribed-no">Not Subscribed</Label>
+                <Label htmlFor="subscribed-no">No Suscrito</Label>
               </div>
             </div>
           </CollapsibleContent>
@@ -238,7 +348,7 @@ export function FilterCard({
           onOpenChange={() => toggleSection('frequency')}
         >
           <CollapsibleTrigger className="flex w-full items-center justify-between py-1">
-            <h3 className="text-sm font-medium">Purchase Frequency</h3>
+            <h3 className="text-sm font-medium">Frecuencia de Compra</h3>
             {openSections.frequency ? (
               <ChevronUp className="size-4 text-muted-foreground" />
             ) : (
@@ -247,19 +357,22 @@ export function FilterCard({
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-2">
             <div className="max-h-40 space-y-2 overflow-y-auto pr-2">
-              {purchaseFrequencies.map((frequency) => (
+              {Object.values(FREQUENCIES).map((frequency) => (
                 <div key={frequency} className="flex items-center space-x-2">
                   <Checkbox
                     id={`frequency-${frequency}`}
-                    checked={filters.purchaseFrequency[frequency] || false}
+                    checked={filters.purchaseFrequency[frequency]}
                     onCheckedChange={(checked) => {
-                      const newFrequencies = { ...filters.purchaseFrequency };
-                      newFrequencies[frequency] = !!checked;
-                      onFilterChange({ purchaseFrequency: newFrequencies });
+                      updateFilters({
+                        purchaseFrequency: {
+                          ...filters.purchaseFrequency,
+                          [frequency]: !!checked,
+                        },
+                      });
                     }}
                   />
                   <Label htmlFor={`frequency-${frequency}`}>
-                    {formatFrequency(frequency)}
+                    {translate.frequency(frequency)}
                   </Label>
                 </div>
               ))}
@@ -275,7 +388,7 @@ export function FilterCard({
           onOpenChange={() => toggleSection('category')}
         >
           <CollapsibleTrigger className="flex w-full items-center justify-between py-1">
-            <h3 className="text-sm font-medium">Product Category</h3>
+            <h3 className="text-sm font-medium">Categoría de Producto</h3>
             {openSections.category ? (
               <ChevronUp className="size-4 text-muted-foreground" />
             ) : (
@@ -284,19 +397,22 @@ export function FilterCard({
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-2">
             <div className="space-y-2">
-              {productCategories.map((category) => (
+              {Object.values(CATEGORIES).map((category) => (
                 <div key={category} className="flex items-center space-x-2">
                   <Checkbox
                     id={`category-${category}`}
-                    checked={filters.productCategory[category] || false}
+                    checked={filters.productCategory[category]}
                     onCheckedChange={(checked) => {
-                      const newCategories = { ...filters.productCategory };
-                      newCategories[category] = !!checked;
-                      onFilterChange({ productCategory: newCategories });
+                      updateFilters({
+                        productCategory: {
+                          ...filters.productCategory,
+                          [category]: !!checked,
+                        },
+                      });
                     }}
                   />
                   <Label htmlFor={`category-${category}`}>
-                    {formatCategory(category)}
+                    {translate.category(category)}
                   </Label>
                 </div>
               ))}
