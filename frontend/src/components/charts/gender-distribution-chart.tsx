@@ -14,6 +14,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
+import { translate } from '@/utils/translation';
 
 interface GenderDistributionChartProps {
   data: Array<{ gender: string; count: number }>;
@@ -25,7 +26,7 @@ export function GenderDistributionChart({
   // Calculate percentages
   const total = data.reduce((acc, item) => acc + item.count, 0);
   const chartData = data.map((item) => ({
-    name: item.gender.charAt(0).toUpperCase() + item.gender.slice(1),
+    name: translate.gender(item.gender),
     value: item.count,
     percentage: Math.round((item.count / total) * 100),
   }));
@@ -45,9 +46,11 @@ export function GenderDistributionChart({
             fill="#8884d8"
             paddingAngle={0}
             dataKey="value"
-            label={({ name, percentage }) => `${name} (${percentage}%)`}
+            label={({ name, percentage }) =>
+              `${name.charAt(0)} (${percentage}%)`
+            }
           >
-            {chartData.map((entry, index) => (
+            {chartData.map((_, index) => (
               <Cell
                 key={`cell-${index}`}
                 fill={COLORS[index % COLORS.length]}
@@ -67,10 +70,10 @@ export function GenderDistributionChart({
                             {payload[0].name}
                           </div>
                           <div className="text-sm">
-                            Count: {payload[0].value}
+                            Cantidad: {payload[0].value}
                           </div>
                           <div className="text-sm">
-                            Percentage: {payload[0].payload.percentage}%
+                            Porcentage: {payload[0].payload.percentage}%
                           </div>
                         </div>
                       }

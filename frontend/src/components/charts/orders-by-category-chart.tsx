@@ -16,20 +16,16 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
+import { translate } from '@/utils/translation';
 
 interface OrdersByCategoryChartProps {
   data: Array<{ category: string; male: number; female: number }>;
 }
 
 export function OrdersByCategoryChart({ data }: OrdersByCategoryChartProps) {
-  // Format category names for better display
-  const formatCategory = (category: string) => {
-    return category.charAt(0).toUpperCase() + category.slice(1);
-  };
-
   // Transform data for better display
   const chartData = data.map((item) => ({
-    name: formatCategory(item.category),
+    name: translate.category(item.category),
     male: item.male,
     female: item.female,
   }));
@@ -64,10 +60,10 @@ export function OrdersByCategoryChart({ data }: OrdersByCategoryChartProps) {
                         <div>
                           <div className="text-sm font-medium">{label}</div>
                           <div className="text-sm">
-                            Male: {payload[0].value}
+                            Masculino: {payload[0].value}
                           </div>
                           <div className="text-sm">
-                            Female: {payload[1].value}
+                            Femenino: {payload[1].value}
                           </div>
                           <div className="mt-1 text-sm font-medium">
                             Total: {total}
@@ -82,8 +78,8 @@ export function OrdersByCategoryChart({ data }: OrdersByCategoryChartProps) {
             }}
           />
           <Legend />
-          <Bar dataKey="male" stackId="a" fill="#5352ed" name="Male" />
-          <Bar dataKey="female" stackId="a" fill="#ff6b81" name="Female" />
+          <Bar dataKey="male" stackId="a" fill="#5352ed" name="Masculino" />
+          <Bar dataKey="female" stackId="a" fill="#ff6b81" name="Femenino" />
         </BarChart>
       </ResponsiveContainer>
     </ChartContainer>

@@ -12,11 +12,13 @@ class CustomerInsightsFilter(django_filters.FilterSet):
     subscribed = django_filters.BooleanFilter(
         field_name="customer__subscription_status"
     )
-    frequency = django_filters.BaseInFilter(
-        field_name="customer__frequency_of_purchases", lookup_expr="in"
+    frequency = django_filters.AllValuesMultipleFilter(
+        field_name="customer__frequency_of_purchases",
+        conjoined=False,
     )
-    category = django_filters.BaseInFilter(
-        field_name="product_variant__product__category", lookup_expr="in"
+    category = django_filters.AllValuesMultipleFilter(
+        field_name="product_variant__product__category",
+        conjoined=False,
     )
 
     class Meta:

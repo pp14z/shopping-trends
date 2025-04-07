@@ -16,6 +16,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
+import { translate } from '@/utils/translation';
 
 interface FrequencyDistributionChartProps {
   data: Array<{ frequency_of_purchases: string; male: number; female: number }>;
@@ -24,16 +25,8 @@ interface FrequencyDistributionChartProps {
 export function FrequencyDistributionChart({
   data,
 }: FrequencyDistributionChartProps) {
-  // Format frequency labels for better display
-  const formatFrequency = (frequency: string) => {
-    return frequency
-      .split(' ')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  };
-
   const chartData = data.map((item) => ({
-    name: formatFrequency(item.frequency_of_purchases),
+    name: translate.frequency(item.frequency_of_purchases),
     male: item.male,
     female: item.female,
   }));
@@ -69,10 +62,10 @@ export function FrequencyDistributionChart({
                         <div>
                           <div className="text-sm font-medium">{label}</div>
                           <div className="text-sm">
-                            Male: {payload[0].value}
+                            Masculino: {payload[0].value}
                           </div>
                           <div className="text-sm">
-                            Female: {payload[1].value}
+                            Femenino: {payload[1].value}
                           </div>
                           <div className="mt-1 text-sm font-medium">
                             Total: {total}
@@ -87,8 +80,8 @@ export function FrequencyDistributionChart({
             }}
           />
           <Legend />
-          <Bar dataKey="male" stackId="a" fill="#5352ed" name="Male" />
-          <Bar dataKey="female" stackId="a" fill="#ff6b81" name="Female" />
+          <Bar dataKey="male" stackId="a" fill="#5352ed" name="Masculino" />
+          <Bar dataKey="female" stackId="a" fill="#ff6b81" name="Femenino" />
         </BarChart>
       </ResponsiveContainer>
     </ChartContainer>

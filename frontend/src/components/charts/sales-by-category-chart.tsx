@@ -16,17 +16,13 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
+import { translate } from '@/utils/translation';
 
 interface SalesByCategoryChartProps {
   data: Array<{ category: string; male: number; female: number }>;
 }
 
 export function SalesByCategoryChart({ data }: SalesByCategoryChartProps) {
-  // Format category names for better display
-  const formatCategory = (category: string) => {
-    return category.charAt(0).toUpperCase() + category.slice(1);
-  };
-
   // Format currency
   const formatCurrency = (value: number) => {
     return `$${value.toLocaleString()}`;
@@ -34,7 +30,7 @@ export function SalesByCategoryChart({ data }: SalesByCategoryChartProps) {
 
   // Transform data for better display
   const chartData = data.map((item) => ({
-    name: formatCategory(item.category),
+    name: translate.category(item.category),
     male: item.male,
     female: item.female,
   }));
@@ -69,10 +65,12 @@ export function SalesByCategoryChart({ data }: SalesByCategoryChartProps) {
                         <div>
                           <div className="text-sm font-medium">{label}</div>
                           <div className="text-sm">
-                            Male: {formatCurrency(payload[0].value as number)}
+                            Masculino:{' '}
+                            {formatCurrency(payload[0].value as number)}
                           </div>
                           <div className="text-sm">
-                            Female: {formatCurrency(payload[1].value as number)}
+                            Femenino:{' '}
+                            {formatCurrency(payload[1].value as number)}
                           </div>
                           <div className="mt-1 text-sm font-medium">
                             Total: {formatCurrency(total)}
@@ -87,8 +85,8 @@ export function SalesByCategoryChart({ data }: SalesByCategoryChartProps) {
             }}
           />
           <Legend />
-          <Bar dataKey="male" stackId="a" fill="#5352ed" name="Male" />
-          <Bar dataKey="female" stackId="a" fill="#ff6b81" name="Female" />
+          <Bar dataKey="male" stackId="a" fill="#5352ed" name="Masculino" />
+          <Bar dataKey="female" stackId="a" fill="#ff6b81" name="Femenino" />
         </BarChart>
       </ResponsiveContainer>
     </ChartContainer>
