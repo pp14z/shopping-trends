@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.core.cache import cache
 from django.db.models import Avg, Count, Sum
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, viewsets
@@ -14,10 +16,23 @@ class CustomerInsightsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = CustomerInsightsFilter
 
+    def get_cache_key(self, request):
+        """Generate a unique cache key based on the request parameters"""
+        query_params = request.query_params.copy()
+        sorted_params = sorted(query_params.items())
+        params_string = "_".join(f"{k}:{v}" for k, v in sorted_params)
+        return f"customer_insights_{params_string}"
+
     def get_queryset(self):
         return Order.objects.select_related("customer", "product_variant__product")
 
     def list(self, request, *args, **kwargs):
+        cache_key = self.get_cache_key(request)
+        cached_data = cache.get(cache_key)
+
+        if cached_data is not None:
+            return Response(cached_data)
+
         orders = self.filter_queryset(self.get_queryset())
         customers = Customer.objects.filter(
             id__in=orders.values_list("customer_id", flat=True).distinct()
@@ -93,28 +108,27 @@ class CustomerInsightsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             decimal_places=2,
         )
 
-        return Response(
-            {
-                "total_customers": total_customers,
-                "total_orders": total_orders,
-                "total_sales": round(total_sales, 2),
-                "average_age": round(avg_age, 1),
-                "subscription_rate": round(subscription_rate, 1),
-                "average_previous_purchases": round(avg_orders, 1),
-                "average_order_value": round(avg_order_value, 2),
-                "average_review_rating": round(avg_review_rating, 2),
-                "customer_distribution_by_gender": customer_distribution_by_gender,
-                "customer_distribution_by_age": customer_distribution_by_age,
-                "customer_distribution_by_subscription": (
-                    customer_distribution_by_subscription
-                ),
-                "customer_distribution_by_frequency": (
-                    customer_distribution_by_frequency
-                ),
-                "total_orders_by_category_gender": total_orders_by_category_gender,
-                "total_sales_by_category_gender": total_sales_by_category_gender,
-                "avg_order_value_by_category_gender": (
-                    avg_order_value_by_category_gender
-                ),
-            }
-        )
+        response_data = {
+            "total_customers": total_customers,
+            "total_orders": total_orders,
+            "total_sales": round(total_sales, 2),
+            "average_age": round(avg_age, 1),
+            "subscription_rate": round(subscription_rate, 1),
+            "average_previous_purchases": round(avg_orders, 1),
+            "average_order_value": round(avg_order_value, 2),
+            "average_review_rating": round(avg_review_rating, 2),
+            "customer_distribution_by_gender": customer_distribution_by_gender,
+            "customer_distribution_by_age": customer_distribution_by_age,
+            "customer_distribution_by_subscription": (
+                customer_distribution_by_subscription
+            ),
+            "customer_distribution_by_frequency": (customer_distribution_by_frequency),
+            "total_orders_by_category_gender": total_orders_by_category_gender,
+            "total_sales_by_category_gender": total_sales_by_category_gender,
+            "avg_order_value_by_category_gender": (avg_order_value_by_category_gender),
+        }
+
+        # Guardar response en la cache
+        cache.set(cache_key, response_data, timeout=settings.CACHE_TTL)
+
+        return Response(response_data)

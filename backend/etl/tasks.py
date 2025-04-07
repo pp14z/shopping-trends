@@ -1,6 +1,7 @@
 import logging
 
 import pandas as pd
+from django.core.cache import cache
 
 from .clean_data import clean_data
 from .load_data import load_data
@@ -30,6 +31,9 @@ def run_etl(csv_path):
     try:
         print("Cargando datos a la base de datos...")
         load_data(df_clean)
+
+        # Invalidar todas las caches
+        cache.clear()
     except Exception as e:  # noqa: F841
         logger.exception("Error durante la carga de datos")
         return

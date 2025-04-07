@@ -75,6 +75,13 @@ DATABASES = {
     "default": env.db_url("DATABASE_URL"),
 }
 
+# Cache
+CACHES = {
+    "default": env.cache_url("CACHE_URL", default="locmemcache://default"),
+}
+
+CACHE_TTL = env.int("CACHE_TTL", default=60 * 15)
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
