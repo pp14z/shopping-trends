@@ -197,7 +197,7 @@ export function Filters() {
             variant="ghost"
             size="sm"
             onClick={resetFilters}
-            className="text-muted-foreground h-8 px-2"
+            className="h-8 px-2 text-muted-foreground"
           >
             <RefreshCw className="mr-2 size-3.5" />
             Reiniciar
@@ -213,9 +213,9 @@ export function Filters() {
           <CollapsibleTrigger className="flex w-full items-center justify-between py-1">
             <h3 className="text-sm font-medium">Estado de Suscripción</h3>
             {openSections.subscription ? (
-              <ChevronUp className="text-muted-foreground size-4" />
+              <ChevronUp className="size-4 text-muted-foreground" />
             ) : (
-              <ChevronDown className="text-muted-foreground size-4" />
+              <ChevronDown className="size-4 text-muted-foreground" />
             )}
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-2">
@@ -253,9 +253,9 @@ export function Filters() {
           <CollapsibleTrigger className="flex w-full items-center justify-between py-1">
             <h3 className="text-sm font-medium">Género</h3>
             {openSections.gender ? (
-              <ChevronUp className="text-muted-foreground size-4" />
+              <ChevronUp className="size-4 text-muted-foreground" />
             ) : (
-              <ChevronDown className="text-muted-foreground size-4" />
+              <ChevronDown className="size-4 text-muted-foreground" />
             )}
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-2">
@@ -296,9 +296,9 @@ export function Filters() {
           <CollapsibleTrigger className="flex w-full items-center justify-between py-1">
             <h3 className="text-sm font-medium">Categoría de Producto</h3>
             {openSections.category ? (
-              <ChevronUp className="text-muted-foreground size-4" />
+              <ChevronUp className="size-4 text-muted-foreground" />
             ) : (
-              <ChevronDown className="text-muted-foreground size-4" />
+              <ChevronDown className="size-4 text-muted-foreground" />
             )}
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-2">
@@ -336,9 +336,9 @@ export function Filters() {
           <CollapsibleTrigger className="flex w-full items-center justify-between py-1">
             <h3 className="text-sm font-medium">Frecuencia de Compra</h3>
             {openSections.frequency ? (
-              <ChevronUp className="text-muted-foreground size-4" />
+              <ChevronUp className="size-4 text-muted-foreground" />
             ) : (
-              <ChevronDown className="text-muted-foreground size-4" />
+              <ChevronDown className="size-4 text-muted-foreground" />
             )}
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-2">
