@@ -26,6 +26,9 @@ module.exports = {
       parser: '@typescript-eslint/parser',
       settings: {
         react: { version: 'detect' },
+        tailwindcss: {
+          config: 'tailwind.config.ts'
+        },
         'import/parsers': {
           "@typescript-eslint/parser": [".ts", ".tsx"],
         },
@@ -64,15 +67,7 @@ module.exports = {
           'error',
           {
             zones: [
-              // disables cross-feature imports:
-              {
-                target: './src/features/customers',
-                from: './src/features',
-                except: ['./customers'],
-              },
-
               // enforce unidirectional codebase:
-              // e.g. src/app can import from src/features but not the other way around
               {
                 target: './src/features',
                 from: './src/app',
@@ -116,7 +111,11 @@ module.exports = {
         'import/no-named-as-default': 'off',
         'react/react-in-jsx-scope': 'off',
         'jsx-a11y/anchor-is-valid': 'off',
-        '@typescript-eslint/no-unused-vars': ['error'],
+        '@typescript-eslint/no-unused-vars': ['error', {
+          "argsIgnorePattern": "^_",
+          "varsIgnorePattern": "^_",
+          "caughtErrorsIgnorePattern": "^_",
+        }],
         '@typescript-eslint/explicit-function-return-type': ['off'],
         '@typescript-eslint/explicit-module-boundary-types': ['off'],
         '@typescript-eslint/no-empty-function': ['off'],

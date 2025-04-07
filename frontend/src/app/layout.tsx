@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import type React from 'react';
 
 import '@/styles/globals.css';
-
 import { Providers } from './providers';
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Shopping Trends',
@@ -12,8 +14,8 @@ export const metadata: Metadata = {
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <html lang="es">
-      <body>
+    <html lang="en">
+      <body className={inter.className}>
         <Providers>{children}</Providers>
       </body>
     </html>
