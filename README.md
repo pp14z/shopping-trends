@@ -60,7 +60,7 @@ Solución end-to-end para el análisis de tendencias de compra. El sistema extra
 ### **API**
 - [X] Crear endpoint `/api/customers/insights/` para ver Customer Insights
 - [X] Implementar filtros dinámicos
-- [ ] Añadir anotaciones y agregaciones a los insights
+- [X] Añadir anotaciones y agregaciones a los insights
 - [ ] Hacer pruebas del endpoint con distintos filtros y combinaciones
 - [ ] Cachear resultados e invalidarlos cuando se cargue nueva data
 

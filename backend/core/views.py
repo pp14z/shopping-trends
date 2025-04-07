@@ -1,10 +1,11 @@
-from django.db.models import Avg, Sum
+from django.db.models import Avg, Count, Sum
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, viewsets
 from rest_framework.response import Response
 
 from .filters import CustomerInsightsFilter
 from .models import Customer, Order
+from .utils import pivot_grouped_by_gender
 
 
 class CustomerInsightsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -31,11 +32,66 @@ class CustomerInsightsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         )
         avg_orders = customers.aggregate(avg=Avg("previous_purchases"))["avg"] or 0
 
+        # === Anotaciones de clientes ===
+        customer_distribution_by_gender = list(
+            customers.values("gender").annotate(count=Count("id")).order_by("gender")
+        )
+
+        raw_age = customers.values("age", "gender").annotate(count=Count("id"))
+        customer_distribution_by_age = pivot_grouped_by_gender(raw_age, "age")
+
+        raw_subscription = customers.values("subscription_status", "gender").annotate(
+            count=Count("id")
+        )
+        customer_distribution_by_subscription = pivot_grouped_by_gender(
+            raw_subscription, "subscription_status"
+        )
+
+        raw_freq = customers.values("frequency_of_purchases", "gender").annotate(
+            count=Count("id")
+        )
+        customer_distribution_by_frequency = pivot_grouped_by_gender(
+            raw_freq, "frequency_of_purchases"
+        )
+
         # === Métricas de órdenes ===
         total_orders = orders.count()
         total_sales = orders.aggregate(total=Sum("purchase_amount"))["total"] or 0
         avg_order_value = total_sales / total_orders if total_orders else 0
         avg_review_rating = orders.aggregate(avg=Avg("review_rating"))["avg"] or 0
+
+        # === Anotaciones de órdenes ===
+        raw_orders_by_category_gender = orders.values(
+            "product_variant__product__category", "customer__gender"
+        ).annotate(count=Count("id"))
+        total_orders_by_category_gender = pivot_grouped_by_gender(
+            raw_orders_by_category_gender,
+            field="product_variant__product__category",
+            gender_field="customer__gender",
+            rename_field="category",
+        )
+
+        raw_sales_by_category_gender = orders.values(
+            "product_variant__product__category", "customer__gender"
+        ).annotate(count=Sum("purchase_amount"))
+        total_sales_by_category_gender = pivot_grouped_by_gender(
+            raw_sales_by_category_gender,
+            field="product_variant__product__category",
+            gender_field="customer__gender",
+            rename_field="category",
+            decimal_places=1,
+        )
+
+        raw_avg_order_value_by_category_gender = orders.values(
+            "product_variant__product__category", "customer__gender"
+        ).annotate(count=Avg("purchase_amount"))
+        avg_order_value_by_category_gender = pivot_grouped_by_gender(
+            raw_avg_order_value_by_category_gender,
+            field="product_variant__product__category",
+            gender_field="customer__gender",
+            rename_field="category",
+            decimal_places=2,
+        )
 
         return Response(
             {
@@ -47,5 +103,18 @@ class CustomerInsightsViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
                 "average_previous_purchases": round(avg_orders, 1),
                 "average_order_value": round(avg_order_value, 2),
                 "average_review_rating": round(avg_review_rating, 2),
+                "customer_distribution_by_gender": customer_distribution_by_gender,
+                "customer_distribution_by_age": customer_distribution_by_age,
+                "customer_distribution_by_subscription": (
+                    customer_distribution_by_subscription
+                ),
+                "customer_distribution_by_frequency": (
+                    customer_distribution_by_frequency
+                ),
+                "total_orders_by_category_gender": total_orders_by_category_gender,
+                "total_sales_by_category_gender": total_sales_by_category_gender,
+                "avg_order_value_by_category_gender": (
+                    avg_order_value_by_category_gender
+                ),
             }
         )

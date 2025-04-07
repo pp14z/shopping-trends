@@ -15,8 +15,8 @@ class CustomerInsightsFilter(django_filters.FilterSet):
     frequency = django_filters.BaseInFilter(
         field_name="customer__frequency_of_purchases", lookup_expr="in"
     )
-    category = django_filters.CharFilter(
-        field_name="product_variant__product__category", lookup_expr="iexact"
+    category = django_filters.BaseInFilter(
+        field_name="product_variant__product__category", lookup_expr="in"
     )
 
     class Meta:
