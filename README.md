@@ -14,7 +14,7 @@ Solución end-to-end para el análisis de tendencias de compra. El sistema extra
 
 1. **Clonar el repositorio e ingresar al directorio**:
    ```bash
-   git clone <url-del-repositorio>
+   git clone [<url-del-repositorio>](https://github.com/pp14z/shopping-trends)
    cd shopping-trends
    ```
 
