@@ -8,6 +8,9 @@ ENV PYTHONUNBUFFERED 1
 # set work directory
 WORKDIR /usr/src/app
 
+# install make
+RUN apt-get update && apt-get install -y make && rm -rf /var/lib/apt/lists/*
+
 # install dependencies
 COPY requirements.txt /usr/src/app/
 RUN pip install --no-cache-dir -r requirements.txt

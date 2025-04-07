@@ -62,6 +62,7 @@ Solución end-to-end para el análisis de tendencias de compra. El sistema extra
 - [X] Implementar filtros dinámicos
 - [X] Añadir anotaciones y agregaciones a los insights
 - [X] Hacer pruebas del endpoint con distintos filtros y combinaciones
+- [X] Configurar GitHub Actions para ejecutar pruebas del backend con Docker
 - [ ] Cachear resultados e invalidarlos cuando se cargue nueva data
 
 ### **Frontend**

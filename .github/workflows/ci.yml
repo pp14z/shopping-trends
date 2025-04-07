@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Run Django Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and run 
+        working-directory: ./backend
+        run: |
+          docker build -t shopping-trends-backend .
+          docker run \
+            --network host \
+            -e SECRET_KEY=django-insecure-secret-key \
+            -e DEBUG=True \
+            -e DATABASE_URL="postgres://postgres:postgres@localhost:5432/postgres" \
+            shopping-trends-backend \
+            make test
